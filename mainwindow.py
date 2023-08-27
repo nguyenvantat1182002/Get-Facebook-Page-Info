@@ -32,6 +32,7 @@ class MainWindow(QMainWindow):
         config.max_thread_count = self.spinBox.value()
         config.get_max_page_count = lambda: self.tableWidget.rowCount()
         config.get_page_id = lambda row: self.tableWidget.item(row, 1)
+        config.max_page_id_count = int(self.label_7.text())
 
         self.scaner = PageScaner(config)
         self.scaner.finished.connect(self.task_finished)
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow):
         self.scaner.update_likes.connect(lambda row, text: self.tableWidget.setItem(row, 2, QTableWidgetItem(text)))
         self.scaner.update_address.connect(lambda row, text: self.tableWidget.setItem(row, 3, QTableWidgetItem(text)))
         self.scaner.update_verified.connect(lambda row, text: self.tableWidget.setItem(row, 4, QTableWidgetItem(text)))
+        self.scaner.update_scaned.connect(self.label_3.setText)
+        self.scaner.update_remaining.connect(self.label_5.setText)
         self.scaner.start()
 
     def pushButton_click(self) -> None:

@@ -35,6 +35,14 @@ class Scaner(QRunnable):
                 self.parent.update_likes.emit(row, likes if likes is not None else '')
                 self.parent.update_address.emit(row, address if address is not None else '')
                 self.parent.update_verified.emit(row, str(verified))
+
+                with QMutexLocker(self.parent.mutex):
+                    self.parent.scaned_count += 1
+                    self.parent.remaining_count -= 1
+
+                    self.parent.update_scaned.emit(str(self.parent.scaned_count))
+                    self.parent.update_remaining.emit(str(self.parent.remaining_count))
+
             except Exception as e:
                 print(e)
 
@@ -43,6 +51,8 @@ class PageScaner(QThread):
     update_likes = pyqtSignal(int, str)
     update_address = pyqtSignal(int, str)
     update_verified = pyqtSignal(int, str)
+    update_scaned = pyqtSignal(str)
+    update_remaining = pyqtSignal(str)
 
     def __init__(self, config: QObject):
         super().__init__()
@@ -51,6 +61,9 @@ class PageScaner(QThread):
         self.running = True
         self.mutex = QMutex()
         self.page_ids = self.get_page_ids()
+
+        self.scaned_count = 0
+        self.remaining_count = self.config.max_page_id_count
 
     def get_page_ids(self) -> Queue:
         max_page_count = self.config.get_max_page_count()

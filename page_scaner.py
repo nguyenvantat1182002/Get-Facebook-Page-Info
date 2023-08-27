@@ -29,6 +29,8 @@ class Scaner(QRunnable):
                 address = p.get_address()
                 verified = p.is_verified()
 
+                p.session.close()
+
                 self.parent.update_page_name.emit(row, name if name is not None else '')
                 self.parent.update_likes.emit(row, likes if likes is not None else '')
                 self.parent.update_address.emit(row, address if address is not None else '')

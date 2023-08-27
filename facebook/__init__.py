@@ -30,22 +30,24 @@ class Page:
 
     def get_likes(self) -> str:
         soup = BeautifulSoup(self.content.text, 'html.parser')
-        page_description = soup.select_one('meta[property="og:description"]')
-        page_description = page_description['content']
 
-        likes = re.findall(r'(\d+(?:,\d{3})*)(?:\s+likes)', self.content.text)
+        page_description = soup.select_one('meta[name="description"]')
+        page_description = page_description['content']
+        page_description = page_description[len(self.get_name()):]
+
+        likes = re.findall(r'([\d,]+K?)\s+likes', page_description)
         if not likes:
             return None
-
+        
         return likes[0]
     
     def get_address(self) -> str:
-        address = re.findall(r'"text":"(.*?)"', self.content.text)
-        
         if 'maps.google.com' not in self.content.text:
             return None
         
-        return address[4]
+        address = re.findall(r'"text":"([^"]*)"}},"associated_page_id"', self.content.text)
+        
+        return address[0]
         
     def is_verified(self) -> bool:
         return '"is_verified":true' in self.content.text

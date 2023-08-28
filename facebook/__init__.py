@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from typing import Optional
 
 import requests
 import re
@@ -28,7 +29,7 @@ class Page:
 
         return title['content']
 
-    def get_likes(self) -> str:
+    def get_likes(self) -> Optional[int]:
         soup = BeautifulSoup(self.content.text, 'html.parser')
 
         page_description = soup.select_one('meta[name="description"]')
@@ -39,7 +40,17 @@ class Page:
         if not likes:
             return None
         
-        return likes[0]
+        likes: str = likes[0]
+        
+        if likes.endswith('K'):
+            likes = likes.replace('K', '')
+            likes = int(likes) * 1000
+        elif ',' in likes:
+            likes = likes.replace(',', '')
+
+        likes = int(likes)
+
+        return likes
     
     def get_address(self) -> str:
         if 'maps.google.com' not in self.content.text:

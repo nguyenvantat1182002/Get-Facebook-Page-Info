@@ -32,11 +32,32 @@ class Scaner(QRunnable):
                 p.session.close()
 
                 self.parent.update_page_name.emit(row, name if name is not None else '')
-                self.parent.update_likes.emit(row, likes if likes is not None else '')
+                self.parent.update_likes.emit(row, str(likes) if likes is not None else '')
                 self.parent.update_address.emit(row, address if address is not None else '')
                 self.parent.update_verified.emit(row, str(verified))
 
                 with QMutexLocker(self.parent.mutex):
+                    name = name if name is not None else 'NaN'
+                    likes = likes if likes is not None else 'NaN'
+                    address = address if address is not None else 'NaN'
+                    
+                    data = f'{name}|{page_id}|{likes}|{address}|{str(verified)}'
+
+                    if verified:
+                        self.parent.save(f'verified_True.txt', data)
+
+                        if isinstance(likes, int) and likes >= 1000000:
+                            self.parent.save(f'verified_True_Over_1M.txt', data)
+                        else:
+                            self.parent.save(f'verified_True_Under_1M.txt', data)
+                    else:
+                        self.parent.save(f'verified_False.txt', data)
+
+                        if isinstance(likes, int) and likes <= 1000000:
+                            self.parent.save(f'verified_False_Under_1M.txt', data)
+                        else:
+                            self.parent.save(f'verified_False_Over_1M.txt', data)
+
                     self.parent.scaned_count += 1
                     self.parent.remaining_count -= 1
 
@@ -64,6 +85,10 @@ class PageScaner(QThread):
 
         self.scaned_count = 0
         self.remaining_count = self.config.max_page_id_count
+
+    def save(self, file_name: str, data: str):
+        with open(f'output/{file_name}', 'a', encoding='utf-8') as file:
+            file.write(f'{data}\n')
 
     def get_page_ids(self) -> Queue:
         max_page_count = self.config.get_max_page_count()

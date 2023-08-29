@@ -40,8 +40,17 @@ class Scaner(QRunnable):
                     name = name if name is not None else 'NaN'
                     likes = likes if likes is not None else 'NaN'
                     address = address if address is not None else 'NaN'
-                    
-                    data = f'{name}|{page_id}|{likes}|{address}|{str(verified)}'
+
+                    data = f'{name}|{page_id}|{likes} likes|{address}|{str(verified)}'
+
+                    if not likes == 'NaN':
+                        if likes.endswith('K'):
+                            likes = likes.replace('K', '')
+                            likes = int(likes) * 1000
+                        elif ',' in likes:
+                            likes = likes.replace(',', '')
+
+                        likes = int(likes)
 
                     if verified:
                         self.parent.save(f'verified_True.txt', data)

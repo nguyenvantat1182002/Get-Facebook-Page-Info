@@ -40,17 +40,7 @@ class Page:
         if not likes:
             return None
         
-        likes: str = likes[0]
-        
-        if likes.endswith('K'):
-            likes = likes.replace('K', '')
-            likes = int(likes) * 1000
-        elif ',' in likes:
-            likes = likes.replace(',', '')
-
-        likes = int(likes)
-
-        return likes
+        return likes[0]
     
     def get_address(self) -> str:
         if 'maps.google.com' not in self.content.text:
